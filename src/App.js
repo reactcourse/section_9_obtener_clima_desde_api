@@ -1,6 +1,7 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import Header from './components/Header';
 import Form from './components/Form';
+import Weather from './components/Weather';
 
 function App() {
 
@@ -8,19 +9,27 @@ function App() {
     city: '',
     country: ''
   });
+  const [result, setResult] = useState({});
 
   const [checkWeather, setCheckWeather] = useState(false);
   
   const { city, country } = search;
 
   useEffect(() => { 
-   if(checkWeather){
-      const queryApi=( ()=>{
-        console.log("a consultar ",city,country);
-        
-      })
 
+    const queryApi= async ()=>{
+      const appId = '9dcdb0717e9bebe70327e4d92dd599e7';
+      const url = `http://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=${appId}`;
+      const result= await fetch(url);
+      const data = await result.json();
+      setResult(data);      
+
+    }
+
+   if(checkWeather){ 
+      console.log('A consultar');
       queryApi();
+
    }
 
   }, [checkWeather,city,country]);
@@ -43,7 +52,9 @@ function App() {
               />
             </div>
             <div className='col m6 s12'>
-              2
+              <Weather 
+                resultado={result}
+              />
           </div>
           </div>
         </div>
