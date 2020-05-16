@@ -2,7 +2,7 @@ import React, { Fragment, useState, useEffect } from 'react';
 import Header from './components/Header';
 import Form from './components/Form';
 import Weather from './components/Weather';
-
+import Error from './components/Error';
 function App() {
 
   const [search, setSearch] = useState({
@@ -10,8 +10,8 @@ function App() {
     country: ''
   });
   const [result, setResult] = useState({});
-
   const [checkWeather, setCheckWeather] = useState(false);
+  const [error,setError] = useState(false);
   
   const { city, country } = search;
 
@@ -19,21 +19,35 @@ function App() {
 
     const queryApi= async ()=>{
       const appId = '9dcdb0717e9bebe70327e4d92dd599e7';
-      const url = `http://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=${appId}`;
-      const result= await fetch(url);
-      const data = await result.json();
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=${appId}`;
+      const resultFromApi= await fetch(url);
+      const data = await resultFromApi.json();
       setResult(data);      
+      setCheckWeather(false);
+      //Detecta si hubo errores en la consulta
+      if (result.cod === "404") {
+        setError(true);
+      } else {
+        setError(false);
+      }
 
     }
 
-   if(checkWeather){ 
-      console.log('A consultar');
+   if(checkWeather){       
       queryApi();
-
    }
-
+   //eslint-disable-next-line
   }, [checkWeather,city,country]);
 
+  let componente;
+
+  if(error){
+    componente = <Error mensaje='No hay resultado' />
+  }else{
+    componente= <Weather
+      resultado={result}
+    />
+  }
 
   return (
     <Fragment>
@@ -52,9 +66,7 @@ function App() {
               />
             </div>
             <div className='col m6 s12'>
-              <Weather 
-                resultado={result}
-              />
+              {componente}
           </div>
           </div>
         </div>
